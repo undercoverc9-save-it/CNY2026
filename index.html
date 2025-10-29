@@ -18,7 +18,7 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
       color:var(--text);
       background:
-        radial-gradient(1200px 800px at 80% -10%, #ff002233, transparent 60%),   /* merah sikit lebih jelas */
+        radial-gradient(1200px 800px at 80% -10%, #ff002233, transparent 60%),
         radial-gradient(1200px 800px at 10% 110%, #8a001633, transparent 60%),
         linear-gradient(180deg, var(--bg1), var(--bg2));
       overflow:hidden;
@@ -57,12 +57,12 @@
       border:1px solid #ffffff1a;
       background:
         radial-gradient(800px 500px at 50% -10%, #ffd59717, transparent 70%),
-        linear-gradient(180deg, #7a0012, #2a0008 56%, #1a0005); /* merah lebih pekat */
+        linear-gradient(180deg, #7a0012, #2a0008 56%, #1a0005);
       box-shadow:
         0 40px 60px #00000080,
         0 0 0 2px #00000040 inset,
         0 0 0 1px #ffffff12 inset,
-        0 0 80px 20px #ff1a1a11 inset; /* glow merah halus */
+        0 0 80px 20px #ff1a1a11 inset;
       display:grid;
       place-items:center;
       overflow:hidden;
@@ -123,18 +123,18 @@
     /* Final card */
     .final{
       position:absolute; inset:0; display:grid; place-items:center; text-align:center;
-background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%);
+      background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%);
       opacity:0; pointer-events:none;
     }
-    .final.show{ opacity:1; pointer-events:auto; transition: opacity .8s ease .2s; }
+.final.show{ opacity:1; pointer-events:auto; transition: opacity .8s ease .2s; }
 
     .final .year{
-      font-size: clamp(32px, 6vw, 72px);  /* lebih besar untuk nampak atas kuda */
+      font-size: clamp(32px, 6vw, 72px);
       font-weight:900;
       color:var(--gold2);
       letter-spacing:1px;
       text-shadow: 0 3px 0 #0008, 0 0 22px #fff6;
-      margin-bottom:.15em; /* JARAK supaya duduk di atas kuda */
+      margin-bottom:.15em; /* sit above the horse */
     }
     .final .horse{
       font-size: clamp(100px, 23vw, 240px);
@@ -163,6 +163,22 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
     }
     .btn:active{ transform: translateY(2px); box-shadow: 0 4px 0 #c98b21, 0 6px 16px #0006; }
 
+    /* Riddle overlay (teka-teki) */
+    .overlay{
+      position:absolute; inset:0; display:none; place-items:center;
+      background: linear-gradient(180deg, #0008, #0006);
+      z-index: 6;
+    }
+    .overlay.show{ display:grid; animation: fadeIn .25s ease both; }
+    .riddle-card{
+      background:#2a0008cc; border:1px solid #ffd27a66; border-radius:16px;
+      padding:18px 20px; text-align:center;
+      box-shadow: 0 20px 60px #000a, 0 0 0 2px #000 inset;
+    }
+    .riddle-q{ font-weight:900; color:var(--gold2); font-size:clamp(16px,3.2vw,26px); margin-bottom:.35em; }
+    .riddle-sub{ color:var(--muted); font-size:clamp(12px,2.2vw,16px); margin-bottom:.6em; }
+    .riddle-count{ font-size:clamp(34px,8vw,76px); font-weight:900; color:var(--gold2); text-shadow:0 3px 0 #0008, 0 0 22px #fff6; }
+
     /* Animations */
     @keyframes popIn{
       0%{opacity:0; transform: translateY(14px) scale(.8) rotateX(12deg)}
@@ -173,15 +189,16 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
       0%,100%{ transform: translateY(0) rotate(-2deg) }
       50%{ transform: translateY(-6px) rotate(2deg) }
     }
+    @keyframes fadeIn{ from{opacity:0} to{opacity:1} }
     .enter{ animation: popIn .65s cubic-bezier(.2,.8,.2,1) both; }
 
-    /* Canvas overlay for confetti */
+    /* Confetti */
     canvas#confetti{
       position:absolute; inset:0; width:100%; height:100%;
       pointer-events:none; opacity:.95; mix-blend-mode:screen;
+      z-index:5;
     }
 
-    /* Reduced motion: keep it classy but still nice */
     @media (prefers-reduced-motion: reduce){
       .enter, .final .horse{ animation:none !important }
       canvas#confetti{ display:none }
@@ -201,18 +218,26 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
     <section class="stage" aria-label="Chinese zodiac animation stage">
       <canvas id="confetti" aria-hidden="true"></canvas>
 
-      <div class="zodiac" aria-live="polite" aria-atomic="true">
+      <div class="zodiac" id="zodiacWrap" aria-live="polite" aria-atomic="true">
         <div id="emoji" class="emoji" role="img" aria-label="Rat">🐭</div>
         <div id="label" class="label">Rat</div>
         <div class="progress" id="progress"></div>
       </div>
 
-      <!-- FINAL: 2026 now ABOVE the horse -->
+      <!-- Riddle overlay (before final answer) -->
+      <div id="riddle" class="overlay" aria-hidden="true">
+        <div class="riddle-card">
+          <div class="riddle-q">Guess the zodiac for this year!</div>
+          <div class="riddle-sub">Teka cepat — jawapan akan muncul selepas kiraan ini:</div>
+          <div class="riddle-count" id="countdown">10</div>
+        </div>
+      </div>
+
+      <!-- FINAL: 2026 ABOVE the horse (only ONE horse shown) -->
       <div id="final" class="final" aria-hidden="true">
         <div>
-          <!-- moved up & simplified to just "2026" -->
           <div class="year">2026</div>
-          <div class="horse" role="img" aria-label="Horse">🐴</div>
+<div class="horse" role="img" aria-label="Horse">🐴</div>
           <div class="msg">Year of the Horse — Happy Chinese New Year! Wishing you strength, energy, and fresh beginnings.</div>
           <button class="btn" id="replay">Replay</button>
         </div>
@@ -238,7 +263,7 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
       { name: 'Rabbit', emoji: '🐰' },
       { name: 'Dragon', emoji: '🐲' },
       { name: 'Snake',  emoji: '🐍' },
-{ name: 'Horse',  emoji: '🐴' },
+      { name: 'Horse',  emoji: '🐴' },
       { name: 'Goat',   emoji: '🐐' }, // also "Sheep"
       { name: 'Monkey', emoji: '🐵' },
       { name: 'Rooster',emoji: '🐔' },
@@ -252,6 +277,9 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
     const finalEl = document.getElementById('final');
     const replayBtn = document.getElementById('replay');
     const confettiCanvas = document.getElementById('confetti');
+    const riddleEl = document.getElementById('riddle');
+    const countdownEl = document.getElementById('countdown');
+    const zodiacWrap = document.getElementById('zodiacWrap');
     const ctx = confettiCanvas.getContext && confettiCanvas.getContext('2d');
 
     // Build progress dots
@@ -273,16 +301,16 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
       void emojiEl.offsetWidth;
       emojiEl.classList.add('enter');
       labelEl.classList.add('enter');
-
       dots.forEach((d,i)=> d.classList.toggle('active', i === index));
     }
 
     function sizeCanvas(){
       if(!ctx) return;
       const r = confettiCanvas.getBoundingClientRect();
-      confettiCanvas.width = Math.round(r.width * devicePixelRatio);
-      confettiCanvas.height = Math.round(r.height * devicePixelRatio);
-      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+      const dpr = window.devicePixelRatio || 1;
+      confettiCanvas.width = Math.round(r.width * dpr);
+      confettiCanvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
     }
     window.addEventListener('resize', sizeCanvas, {passive:true});
 
@@ -290,8 +318,9 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
     function runConfetti(ms){
       if (!ctx || prefersReducedMotion) return;
       sizeCanvas();
-      const W = confettiCanvas.width / devicePixelRatio;
-      const H = confettiCanvas.height / devicePixelRatio;
+      const dpr = window.devicePixelRatio || 1;
+      const W = confettiCanvas.width / dpr;
+      const H = confettiCanvas.height / dpr;
 
       const colors = ['#fff7cc','#ffe08a','#ffd166','#ff9f1c','#ff6b6b','#ffd27a','#ffec9f'];
       const pieces = Array.from({length: 160}, ()=> ({
@@ -314,7 +343,8 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
         ctx.clearRect(0,0,W,H);
         for(const p of pieces){
           p.life += 1;
-          p.vx += Math.sin((p.life + p.swing)*0.05)*0.02;
+          p.vx += Math.
+sin((p.life + p.swing)*0.05)*0.02;
           p.x += p.vx;
           p.y += p.vy;
           p.rot += p.vr;
@@ -346,33 +376,54 @@ background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%
       running = true;
       finalEl.classList.remove('show');
       finalEl.setAttribute('aria-hidden','true');
+      // make sure zodiac is visible again on replay
+      zodiacWrap.style.display = 'grid';
 
       // Sequence through all 12
       for (let i = 0; i < zodiacs.length; i++){
         setStage(zodiacs[i], i);
-        // Wait the show time
         await new Promise(r => setTimeout(r, ITEM_DURATION_MS));
-        // Tiny pause between items (except after last)
         if (i < zodiacs.length - 1){
           await new Promise(r => setTimeout(r, PAUSE_BETWEEN_MS));
         }
       }
 
-      // Finale: ensure we end on Horse
-const horseIndex = zodiacs.findIndex(z => z.name === 'Horse');
-      setStage(zodiacs[horseIndex], horseIndex);
-
-      // Reveal final card (2026 now above the horse)
-      requestAnimationFrame(()=>{
-        finalEl.classList.add('show');
-        finalEl.setAttribute('aria-hidden','false');
-        runConfetti(SHOW_FINAL_FIREWORKS_MS);
-      });
+      // NOTE: do NOT re-show Horse here (avoid duplicate). Go to riddle overlay.
+      showRiddleThenFinal();
 
       running = false;
     }
 
+    function showRiddleThenFinal(){
+      // Show overlay with 10-second countdown
+      let t = 10;
+      riddleEl.classList.add('show');
+      riddleEl.setAttribute('aria-hidden','false');
+      countdownEl.textContent = t;
+
+      const timer = setInterval(()=>{
+        t--;
+        countdownEl.textContent = t;
+        if (t <= 0){
+          clearInterval(timer);
+          riddleEl.classList.remove('show');
+          riddleEl.setAttribute('aria-hidden','true');
+          revealFinal();
+        }
+      }, 1000);
+    }
+
+    function revealFinal(){
+      // Hide zodiac layer to ensure only ONE horse is visible
+      zodiacWrap.style.display = 'none';
+
+      finalEl.classList.add('show');
+      finalEl.setAttribute('aria-hidden','false');
+      runConfetti(SHOW_FINAL_FIREWORKS_MS);
+    }
+
     replayBtn.addEventListener('click', playSequence);
+
     // Kick off on load
     window.addEventListener('load', playSequence);
   </script>
