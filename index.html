@@ -1,32 +1,379 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chinese New Year 2026 - Zodiac Animals</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chinese New Year 2026 — Zodiac Sequence</title>
+  <meta name="description" content="Animated sequence of the 12 Chinese zodiacs, finishing with Year of the Horse — 2026." />
+  <style>
+    :root{
+      --bg1:#4a000a; --bg2:#150006; --gold:#f6d36a; --gold2:#ffec9f; --red:#b30016; --text:#fff8e7;
+      --muted:#ffd9a0; --dim:#ffffff22; --accent:#ffb84d;
+    }
+    /* Reset & base */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 80% -10%, #c4001f33, transparent 60%),
+        radial-gradient(1200px 800px at 10% 110%, #8a001633, transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow:hidden;
+    }
+    .wrap{
+      position:relative;
+      min-height:100%;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      align-items:center;
+      justify-items:center;
+      padding:24px;
+    }
+
+    /* Festive top bar */
+    .heading{
+      text-align:center;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+      font-weight:700;
+      font-size:clamp(12px,1.8vw,18px);
+      color:var(--gold2);
+      padding:6px 12px;
+      border:1px solid var(--gold2);
+      border-radius:999px;
+      background: linear-gradient(90deg, #b30 0%, #d11 50%, #b30 100%);
+      box-shadow: 0 0 0 2px #00000040 inset, 0 8px 24px #00000055;
+    }
+
+    /* Stage */
+    .stage{
+      position:relative;
+      width:min(92vw, 780px);
+      aspect-ratio: 16/9;
+      border-radius:24px;
+      border:1px solid #ffffff1a;
+      background:
+        radial-gradient(800px 500px at 50% -10%, #ffd59717, transparent 70%),
+        linear-gradient(180deg, #6a000f, #2a0008 56%, #1a0005);
+      box-shadow:
+        0 40px 60px #00000080,
+        0 0 0 2px #00000040 inset,
+        0 0 0 1px #ffffff12 inset;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      padding: clamp(8px, 2vw, 18px);
+    }
+
+    /* Subtle lattice border */
+    .stage::before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        linear-gradient(45deg, transparent 47%, #ffd27a15 48%, #ffd27a15 52%, transparent 53%),
+        linear-gradient(-45deg, transparent 47%, #ffd27a15 48%, #ffd27a15 52%, transparent 53%);
+      background-size: 30px 30px;
+      pointer-events:none;
+    }
+
+    /* Zodiac display */
+    .zodiac{
+      position:relative;
+      display:grid;
+      gap: clamp(8px, 2.2vw, 14px);
+      place-items:center;
+      text-align:center;
+      transform-style:preserve-3d;
+    }
+    .emoji{
+      font-size: clamp(64px, 18vw, 180px);
+      line-height:1;
+      filter: drop-shadow(0 14px 22px #0008);
+      will-change: transform, opacity;
+    }
+    .label{
+      font-size: clamp(18px, 3.2vw, 28px);
+      font-weight:700;
+      letter-spacing:.6px;
+      text-shadow: 0 2px 0 #0008, 0 0 24px #ffea;
+      color: var(--gold2);
+    }
+
+    /* Progress dots */
+    .progress{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+      margin-top: clamp(8px, 1.5vw, 14px);
+    }
+    .dot{
+      width:12px; height:12px; border-radius:50%;
+      background:#ffffff22; outline:1px solid #ffffff24;
+      box-shadow:0 0 0 1px #000 inset;
+      transition: transform .3s ease, background .3s ease, box-shadow .3s ease;
+    }
+    .dot.active{
+      background: radial-gradient(circle at 30% 30%, #fff 0 30%, var(--gold) 31% 100%);
+      box-shadow: 0 0 12px 2px #ffeb99aa, 0 0 0 1px #000 inset;
+      transform:scale(1.2);
+    }
+
+    /* Final card */
+    .final{
+      position:absolute; inset:0; display:grid; place-items:center; text-align:center;
+      background: radial-gradient(1200px 800px at 50% 100%, #9c000f55, transparent 60%);
+      opacity:0; pointer-events:none;
+    }
+    .final.
+show{ opacity:1; pointer-events:auto; transition: opacity .8s ease .2s; }
+
+    .final .year{
+      font-size: clamp(28px, 5vw, 56px);
+      font-weight:800;
+      color:var(--gold2);
+      letter-spacing:1px;
+      text-shadow: 0 3px 0 #0008, 0 0 22px #fff6;
+    }
+    .final .horse{
+      font-size: clamp(100px, 23vw, 240px);
+      filter: drop-shadow(0 18px 30px #000a);
+      animation: gentle 4s ease-in-out infinite;
+    }
+    .final .msg{
+      font-size: clamp(14px, 2.2vw, 20px);
+      color: var(--muted);
+      margin-top:.2rem;
+    }
+
+    /* Button */
+    .btn{
+      margin-top:14px;
+      display:inline-block;
+      padding:10px 16px;
+      font-weight:700; letter-spacing:.3px;
+      color:#3b0505;
+      background: linear-gradient(180deg, #ffd66b, #ffbf3d);
+      border:1px solid #f2b53c;
+      border-radius:999px;
+      box-shadow: 0 6px 0 #c98b21, 0 10px 20px #0007;
+      cursor:pointer; user-select:none;
+      transition: transform .08s ease;
+    }
+    .btn:active{ transform: translateY(2px); box-shadow: 0 4px 0 #c98b21, 0 6px 16px #0006; }
+
+    /* Animations */
+    @keyframes popIn{
+      0%{opacity:0; transform: translateY(14px) scale(.8) rotateX(12deg)}
+      60%{opacity:1; transform: translateY(-4px) scale(1.05) rotateX(0)}
+      100%{opacity:1; transform: translateY(0) scale(1) rotateX(0)}
+    }
+    @keyframes gentle{
+      0%,100%{ transform: translateY(0) rotate(-2deg) }
+      50%{ transform: translateY(-6px) rotate(2deg) }
+    }
+
+    .enter{ animation: popIn .65s cubic-bezier(.2,.8,.2,1) both; }
+
+    /* Canvas overlay for confetti */
+    canvas#confetti{
+      position:absolute; inset:0; width:100%; height:100%;
+      pointer-events:none; opacity:.95; mix-blend-mode:screen;
+    }
+
+    /* Reduced motion: keep it classy but still nice */
+    @media (prefers-reduced-motion: reduce){
+      .enter, .final .horse{ animation:none !important }
+      canvas#confetti{ display:none }
+    }
+
+    footer{
+      opacity:.9; font-size:12px; color:#ffefc9;
+      text-align:center; margin-top:10px;
+    }
+    a, a:visited{ color:#ffd87e; }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="heading">Chinese New Year • Zodiac Sequence</div>
 
-  <header>
-    <h1>Welcome to Chinese New Year 2026!</h1>
-    <p>Watch the 12 Zodiac Animals parade in sequence!</p>
-  </header>
+    <section class="stage" aria-label="Chinese zodiac animation stage">
+      <canvas id="confetti" aria-hidden="true"></canvas>
 
-  <!-- Zodiac Animals Section -->
-  <section class="zodiac">
-    <div id="zodiac-container">
-      <!-- Zodiac animal divs will be added dynamically via JavaScript -->
-    </div>
-    <div id="final-horse" class="zodiac-animal horse">
-      <h2>Year of the Horse - 2026!</h2>
-    </div>
-  </section>
+      <div class="zodiac" aria-live="polite" aria-atomic="true">
+        <div id="emoji" class="emoji" role="img" aria-label="Rat">🐭</div>
+        <div id="label" class="label">Rat</div>
+        <div class="progress" id="progress"></div>
+      </div>
 
-  <footer>
-    <p>&copy; 2026 Chinese New Year Celebration | All rights reserved.</p>
-  </footer>
+      <div id="final" class="final" aria-hidden="true">
+        <div>
+          <div class="horse" role="img" aria-label="Horse">🐴</div>
+          <div class="year">2026 — Year of the Horse</div>
+          <div class="msg">Happy Chinese New Year! Wishing you strength, energy, and fresh beginnings. </div>
+          <button class="btn" id="replay">Replay</button>
+        </div>
+      </div>
+    </section>
 
-  <script src="scripts.js"></script>
+    <footer>Made with ♥ — paste this file as <strong>index.html</strong> in your GitHub repo and enable GitHub Pages.</footer>
+  </div>
+
+  <script>
+    // --- Configuration ---
+    const ITEM_DURATION_MS = 1000;   // time each zodiac is shown
+    const PAUSE_BETWEEN_MS = 250;    // small gap between items
+    const SHOW_FINAL_FIREWORKS_MS = 6000; // confetti duration
+    // ----------------------
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const zodiacs = [
+      { name: 'Rat',    emoji: '🐭' },
+      { name: 'Ox',     emoji: '🐮' },
+      { name: 'Tiger',  emoji: '🐯' },
+      { name: 'Rabbit', emoji: '🐰' },
+      { name: 'Dragon', emoji: '🐲' },
+      { name: 'Snake',  emoji: '🐍' },
+      { name: 'Horse',  emoji: '🐴' },
+      { name: 'Goat',   emoji: '🐐' }, // also "Sheep"
+      { name: 'Monkey', emoji: '🐵' },
+      { name: 'Rooster',emoji: '🐔' },
+      { name: 'Dog',    emoji: '🐶' },
+      { name: 'Pig',    emoji: '🐷' }  // also "Boar"
+    ];
+
+    const emojiEl = document.getElementById('emoji');
+    const labelEl = document.
+getElementById('label');
+    const progressEl = document.getElementById('progress');
+    const finalEl = document.getElementById('final');
+    const replayBtn = document.getElementById('replay');
+    const confettiCanvas = document.getElementById('confetti');
+    const ctx = confettiCanvas.getContext && confettiCanvas.getContext('2d');
+
+    // Build progress dots
+    const dots = zodiacs.map((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot';
+      d.setAttribute('aria-label', `Step ${i+1}: ${zodiacs[i].name}`);
+      progressEl.appendChild(d);
+      return d;
+    });
+
+    function setStage(item, index){
+      emojiEl.textContent = item.emoji;
+      labelEl.textContent = item.name;
+      emojiEl.setAttribute('aria-label', item.name);
+      emojiEl.classList.remove('enter');
+      labelEl.classList.remove('enter');
+      // Force reflow to restart animation
+      void emojiEl.offsetWidth;
+      emojiEl.classList.add('enter');
+      labelEl.classList.add('enter');
+
+      dots.forEach((d,i)=> d.classList.toggle('active', i === index));
+    }
+
+    function sizeCanvas(){
+      if(!ctx) return;
+      const r = confettiCanvas.getBoundingClientRect();
+      confettiCanvas.width = Math.round(r.width * devicePixelRatio);
+      confettiCanvas.height = Math.round(r.height * devicePixelRatio);
+      ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+    }
+    window.addEventListener('resize', sizeCanvas, {passive:true});
+
+    // Simple confetti for the finale
+    function runConfetti(ms){
+      if (!ctx || prefersReducedMotion) return;
+      sizeCanvas();
+      const W = confettiCanvas.width / devicePixelRatio;
+      const H = confettiCanvas.height / devicePixelRatio;
+
+      const colors = ['#fff7cc','#ffe08a','#ffd166','#ff9f1c','#ff6b6b','#ffd27a','#ffec9f'];
+      const pieces = Array.from({length: 160}, ()=> ({
+        x: Math.random()*W,
+        y: -20 - Math.random()*H*0.4,
+        w: 6 + Math.random()*6,
+        h: 10 + Math.random()*12,
+        vy: 1 + Math.random()*2.4,
+        vx: -1 + Math.random()*2,
+        rot: Math.random()*Math.PI*2,
+        vr: -0.2 + Math.random()*0.4,
+        color: colors[Math.floor(Math.random()*colors.length)],
+        swing: Math.random()*1.2,
+        life: 0
+      }));
+
+      let start = performance.now();
+      function tick(t){
+        const elapsed = t - start;
+        ctx.clearRect(0,0,W,H);
+        for(const p of pieces){
+          p.life += 1;
+          p.vx += Math.sin((p.life + p.swing)*0.05)*0.02;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+
+          // Wrap
+          if(p.y > H + 18){ p.y = -18; p.x = Math.random()*W; }
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = 0.9;
+          ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          ctx.restore();
+        }
+        if (elapsed < ms){
+          requestAnimationFrame(tick);
+        } else {
+          ctx.clearRect(0,0,W,H);
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    let running = false;
+
+    async function playSequence(){
+      if (running) return;
+      running = true;
+      finalEl.classList.remove('show');
+      finalEl.setAttribute('aria-hidden','true');
+
+      // Sequence through all 12
+      for (let i = 0; i < zodiacs.length; i++){
+        setStage(zodiacs[i], i);
+        // Wait the show time
+        await new Promise(r => setTimeout(r, ITEM_DURATION_MS));
+        // Tiny pause between items (except after last)
+        if (i < zodiacs.length - 1){
+          await new Promise(r => setTimeout(r, PAUSE_BETWEEN_MS));
+        }
+      }
+
+      // Finale: Show Horse + 2026 (explicitly re-show to end on Horse)
+      const horseIndex = zodiacs.findIndex(z => z.name === 'Horse');
+      setStage(zodiacs[horseIndex], horseIndex);
+
+      // Reveal final card
+      requestAnimationFrame(()=>{
+        finalEl.classList.add('show');
+        finalEl.setAttribute('aria-hidden','false');
+        runConfetti(SHOW_FINAL_FIREWORKS_MS);
+      });
+running = false;
+    }
+
+    replayBtn.addEventListener('click', playSequence);
+    // Kick off on load
+    window.addEventListener('load', playSequence);
+  </script>
 </body>
 </html>
+
