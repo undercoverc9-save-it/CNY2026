@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Chinese New Year 2026 — Zodiac Sequence</title>
-<meta name="description" content="Animated sequence of the 12 Chinese zodiacs, finishing with Year of the Horse — 2026. Includes sound, play control, and a dragon with fire moving anti-clockwise around the stage." />
+<meta name="description" content="Animated sequence of the 12 Chinese zodiacs, finishing with Year of the Horse — 2026. Includes dragon with fire moving anti-clockwise around the stage." />
 <style>
   :root{
-    --bg1:#4a000a; --bg2:#150006; --gold:#f6d36a; --gold2:#ffec9f; --red:#b30016; --text:#fff8e7;
-    --muted:#ffd9a0; --dim:#ffffff22; --accent:#ffb84d;
+    --bg1:#4a000a; --bg2:#150006; --gold:#f6d36a; --gold2:#ffec9f; --text:#fff8e7;
+    --muted:#ffd9a0;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -52,37 +52,26 @@
     background-size: 30px 30px;
   }
 
-  /* Intro overlay */
-  .overlay{
-    position:absolute; inset:0; display:grid; place-items:center;
-    background: linear-gradient(180deg, #00000080, #00000066);
-    z-index:30; cursor:pointer;
+  /* Tiny control (sound) */
+  .controls{
+    position:absolute; top:10px; right:10px; z-index:20;
+    display:flex; gap:8px;
   }
-  .card{
-    background: #2a0008cc; border:1px solid #ffffff2a; border-radius:18px;
-    padding:20px 18px; text-align:center;
-    box-shadow: 0 20px 60px #000a, 0 0 0 2px #000 inset;
-    cursor:default;
-  }
-  .card h1{ margin:.2rem 0 .6rem; font-size:clamp(18px,3.6vw,28px); color:var(--gold2) }
-  .controls{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px }
   .btn{
-    display:inline-block; padding:10px 16px; font-weight:800; letter-spacing:.3px;
+    display:inline-block; padding:8px 12px; font-weight:800; letter-spacing:.3px;
     color:#3b0505; background: linear-gradient(180deg, #ffd66b, #ffbf3d);
     border:1px solid #f2b53c; border-radius:999px; cursor:pointer; user-select:none;
-    box-shadow: 0 6px 0 #c98b21, 0 10px 20px #0007; transition: transform .08s ease;
+    box-shadow: 0 3px 0 #c98b21, 0 6px 12px #0007; transition: transform .08s ease;
+    font-size:12px;
   }
-  .btn:active{ transform: translateY(2px); box-shadow: 0 4px 0 #c98b21, 0 6px 16px #0006 }
-  .btn.secondary{ background:linear-gradient(180deg,#ffe9a8,#ffd66b); }
-  .tiny{ font-size:12px; opacity:.85; margin-top:8px; color:#ffefc9 }
+  .btn:active{ transform: translateY(1px) }
 
   /* Zodiac stack */
   .zodiac{ position:relative; display:grid; gap:clamp(8px,2.2vw,14px); place-items:center; text-align:center; }
   .emoji{ font-size:clamp(64px,18vw,180px); line-height:1; filter:drop-shadow(0 14px 22px #0008); }
   .label{ font-size:clamp(18px,3.2vw,28px); font-weight:700; letter-spacing:.6px; text-shadow:0 2px 0 #0008, 0 0 24px #ffea; color:var(--gold2) }
   .progress{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:clamp(8px,1.5vw,14px) }
-  .
-dot{ width:12px; height:12px; border-radius:50%; background:#ffffff22; outline:1px solid #ffffff24; box-shadow:0 0 0 1px #000 inset; transition:.3s }
+  .dot{ width:12px; height:12px; border-radius:50%; background:#ffffff22; outline:1px solid #ffffff24; box-shadow:0 0 0 1px #000 inset; transition:.3s }
   .dot.active{ background: radial-gradient(circle at 30% 30%, #fff 0 30%, var(--gold) 31% 100%); box-shadow:0 0 12px 2px #ffeb99aa, 0 0 0 1px #000 inset; transform:scale(1.2) }
 
   /* Final card */
@@ -91,7 +80,7 @@ dot{ width:12px; height:12px; border-radius:50%; background:#ffffff22; outline:1
           opacity:0; pointer-events:none; z-index:10; }
   .final.show{ opacity:1; pointer-events:auto; transition:opacity .8s ease .2s; }
   .final .year{
-    font-size:clamp(28px,6vw,68px); font-weight:900; color:var(--gold2);
+font-size:clamp(28px,6vw,68px); font-weight:900; color:var(--gold2);
     letter-spacing:1px; text-shadow:0 3px 0 #0008, 0 0 22px #fff6; margin-bottom:.1em;
   }
   .final .horse{ font-size:clamp(100px,23vw,240px); filter:drop-shadow(0 18px 30px #000a); animation:gentle 4s ease-in-out infinite; }
@@ -142,6 +131,11 @@ dot{ width:12px; height:12px; border-radius:50%; background:#ffffff22; outline:1
     <div class="heading">Chinese New Year • Zodiac Sequence</div>
 
     <section class="stage" id="stage" aria-label="Chinese zodiac animation stage">
+      <!-- Small control -->
+      <div class="controls">
+        <button class="btn" id="soundToggle" aria-pressed="false" aria-label="Toggle sound">🔈 Sound</button>
+      </div>
+
       <!-- Dragon + fire path -->
       <div id="fireLayer" aria-hidden="true"></div>
       <div id="dragon" aria-hidden="true"><div class="sprite" id="dragonSprite">🐲</div></div>
@@ -149,25 +143,10 @@ dot{ width:12px; height:12px; border-radius:50%; background:#ffffff22; outline:1
       <!-- Confetti -->
       <canvas id="confetti" aria-hidden="true"></canvas>
 
-      <!-- Intro overlay -->
-      <div id="intro" class="overlay" role="dialog" aria-modal="true"
-           onclick="window.__start && window.__start()">
-        <div class="card" onclick="event.stopPropagation()">
-          <h1>Happy Chinese New Year 2026</h1>
-          <div>Click <strong>Play</strong> to begin the 12-zodiac sequence. Sound starts on Play.</div>
-          <div class="controls">
-            <button class="btn" id="playBtn" aria-label="Play animation"
-                    onclick="window.__start && window.__start()">▶ Play</button>
-            <button class="btn secondary" id="soundToggle" aria-pressed="true" aria-label="Toggle sound">🔊 Sound: On</button>
-          </div>
-          <div class="tiny">Tip: You can click anywhere on this overlay to start.</div>
-        </div>
-      </div>
-
       <!-- Main zodiac view -->
       <div class="zodiac" aria-live="polite" aria-atomic="true">
         <div id="emoji" class="emoji" role="img" aria-label="Rat">🐭</div>
-<div id="label" class="label">Rat</div>
+        <div id="label" class="label">Rat</div>
         <div class="progress" id="progress"></div>
       </div>
 
@@ -182,7 +161,7 @@ dot{ width:12px; height:12px; border-radius:50%; background:#ffffff22; outline:1
       </div>
     </section>
 
-    <footer>Paste this as <strong>index.html</strong> in your GitHub repo and enable GitHub Pages.</footer>
+    <footer>Paste this as <strong>index.html</strong> in your GitHub repo and open your GitHub Pages URL.</footer>
   </div>
 
 <script>
@@ -192,280 +171,249 @@ const PAUSE_BETWEEN_MS = 250;           // gap between items
 const SHOW_FINAL_FIREWORKS_MS = 6000;   // confetti duration
 const DRAGON_SPEED_PX_S = 120;          // dragon speed along the rectangle
 const FIRE_SPAWN_EVERY_MS = 160;        // how often to drop 🔥
-
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-document.addEventListener('DOMContentLoaded', () => {
-  /* ======== Grab DOM ======== */
-  const emojiEl = document.getElementById('emoji');
-  const labelEl = document.getElementById('label');
-  const progressEl = document.getElementById('progress');
-  const finalEl = document.getElementById('final');
-  const replayBtn = document.getElementById('replay');
-  const confettiCanvas = document.getElementById('confetti');
-  const introOverlay = document.getElementById('intro');
-  const playBtn = document.getElementById('playBtn');
-  const soundToggle = document.getElementById('soundToggle');
-  const dragon = document.getElementById('dragon');
-  const dragonSprite = document.getElementById('dragonSprite');
-  const fireLayer = document.getElementById('fireLayer');
-  const stage = document.getElementById('stage');
-  const ctx = confettiCanvas && confettiCanvas.getContext ? confettiCanvas.getContext('2d') : null;
+/* ======== Grab DOM ======== */
+const emojiEl = document.getElementById('emoji');
+const labelEl = document.getElementById('label');
+const progressEl = document.getElementById('progress');
+const finalEl = document.getElementById('final');
+const replayBtn = document.getElementById('replay');
+const confettiCanvas = document.getElementById('confetti');
+const soundToggle = document.getElementById('soundToggle');
+const dragonSprite = document.getElementById('dragonSprite');
+const fireLayer = document.getElementById('fireLayer');
+const stage = document.getElementById('stage');
+const ctx = confettiCanvas.getContext && confettiCanvas.getContext('2d');
 
-  /* ======== Data ======== */
-  const zodiacs = [
-    { name: 'Rat',    emoji: '🐭' },
-    { name: 'Ox',     emoji: '🐮' },
-    { name: 'Tiger',  emoji: '🐯' },
-    { name: 'Rabbit', emoji: '🐰' },
-    { name: 'Dragon', emoji: '🐲' },
-    { name: 'Snake',  emoji: '🐍' },
-    { name: 'Horse',  emoji: '🐴' },
-    { name: 'Goat',   emoji: '🐐' },
-    { name: 'Monkey', emoji: '🐵' },
-    { name: 'Rooster',emoji: '🐔' },
-    { name: 'Dog',    emoji: '🐶' },
-    { name: 'Pig',    emoji: '🐷' }
-  ];
+/* ======== Data ======== */
+const zodiacs = [
+  { name: 'Rat',    emoji: '🐭' },
+  { name: 'Ox',     emoji: '🐮' },
+  { name: 'Tiger',  emoji: '🐯' },
+  { name: 'Rabbit', emoji: '🐰' },
+  { name: 'Dragon', emoji: '🐲' },
+  { name: 'Snake',  emoji: '🐍' },
+  { name: 'Horse',  emoji: '🐴' },
+  { name: 'Goat',   emoji: '🐐' },
+  { name: 'Monkey', emoji: '🐵' },
+  { name: 'Rooster',emoji: '🐔' },
+  { name: 'Dog',    emoji: '🐶' },
+  { name: 'Pig',    emoji: '🐷' }
+];
 
-  /* ======== Progress dots ======== */
-  const dots = [];
-  if (progressEl) {
-    zodiacs.forEach((_, i) => {
-      const d = document.createElement('div');
-      d.className = 'dot';
-      d.setAttribute('aria-label', `Step ${i+1}: ${zodiacs[i].name}`);
-      progressEl.appendChild(d);
-      dots.push(d);
-    });
-  }
-
-  function setStage(item, index){
-    if (!emojiEl || !labelEl) return;
-    emojiEl.textContent = item.emoji;
-    labelEl.textContent = item.name;
-    emojiEl.setAttribute('aria-label', item.name);
-    emojiEl.classList.remove('enter'); labelEl.classList.remove('enter');
-    // restart animation
-    void emojiEl.offsetWidth;
-    emojiEl.classList.add('enter'); labelEl.classList.add('enter');
-    dots.forEach((d,i)=> d.classList.toggle('active', i === index));
-  }
-
-  function sizeCanvas(){
-    if(!ctx || !confettiCanvas) return;
-    const r = confettiCanvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    confettiCanvas.width = Math.max(1, Math.round(r.width * dpr));
-    confettiCanvas.height = Math.max(1, Math.round(r.height * dpr));
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-  }
-  window.addEventListener('resize', sizeCanvas, {passive:true});
-
-  /* ======== Confetti ======== */
-  function runConfetti(ms){
-    if (!ctx || prefersReducedMotion) return;
-    sizeCanvas();
-    const dpr = window.devicePixelRatio || 1;
-    const W = (confettiCanvas.width || 0) / dpr;
-    const H = (confettiCanvas.height || 0) / dpr;
-const colors = ['#fff7cc','#ffe08a','#ffd166','#ff9f1c','#ff6b6b','#ffd27a','#ffec9f'];
-    const pieces = Array.from({length: 160}, ()=> ({
-      x: Math.random()*W, y: -20 - Math.random()*H*0.4,
-      w: 6 + Math.random()*6, h: 10 + Math.random()*12,
-      vy: 1 + Math.random()*2.4, vx: -1 + Math.random()*2,
-      rot: Math.random()*Math.PI*2, vr: -0.2 + Math.random()*0.4,
-      color: colors[Math.floor(Math.random()*colors.length)], swing: Math.random()*1.2, life: 0
-    }));
-
-    let start = performance.now();
-    function tick(t){
-      const elapsed = t - start;
-      ctx.clearRect(0,0,W,H);
-      for(const p of pieces){
-        p.life += 1; p.vx += Math.sin((p.life + p.swing)*0.05)*0.02;
-        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
-        if(p.y > H + 18){ p.y = -18; p.x = Math.random()*W; } // wrap
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-        ctx.fillStyle = p.color; ctx.globalAlpha = 0.9;
-        ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-        ctx.restore();
-      }
-      if (elapsed < ms){ requestAnimationFrame(tick); } else { ctx.clearRect(0,0,W,H); }
-    }
-    requestAnimationFrame(tick);
-  }
-
-  /* ======== Audio (safe, guarded) ======== */
-  let audioCtx = null, masterGain = null, toneTimer = 0, audioOn = true;
-  function safeStartAudio(){
-    if (!audioOn) return;
-    try{
-      audioCtx = audioCtx  new (window.AudioContext  window.webkitAudioContext)();
-      if (!masterGain){
-        masterGain = audioCtx.createGain();
-        masterGain.gain.value = 0.06;
-        masterGain.connect(audioCtx.destination);
-      }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      // simple loop
-      const scale = [0,2,4,7,9]; const baseFreq = 392;
-      let step = 0;
-      clearInterval(toneTimer);
-      toneTimer = setInterval(()=>{
-        if (!audioCtx || audioCtx.state === 'suspended') return;
-        const idx = scale[step % scale.length];
-        const freq = baseFreq * Math.pow(2, idx/12);
-        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        o.type = 'sine'; o.frequency.value = freq;
-        g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(1, audioCtx.currentTime + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.28);
-        o.connect(g).connect(masterGain); o.start(); o.stop(audioCtx.currentTime + 0.3);
-        if (step % 8 === 0){
-          const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain();
-          o2.type='sine'; o2.frequency.value=freq/2;
-          g2.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-          g2.gain.exponentialRampToValueAtTime(1, audioCtx.currentTime + 0.02);
-          g2.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
-          o2.connect(g2).connect(masterGain); o2.start(); o2.stop(audioCtx.currentTime + 0.42);
-        }
-        step++;
-      }, 360);
-    }catch(e){
-      console.warn('Audio start failed:', e);
-    }
-  }
-  function safeStopAudio(){
-    clearInterval(toneTimer);
-    if (audioCtx && audioCtx.state !== 'closed') audioCtx.suspend();
-  }
-
-  /* ======== Dragon path (anti-clockwise) ======== */
-  let dragonRunning = false, dragonRAF = 0, lastFire = 0;
-  function getRectPathCCW(){
-    const pad = 12;
-    const r = stage.getBoundingClientRect();
-    const x0 = pad, y0 = pad;
-    const x1 = Math.max(pad+1, r.width - pad), y1 = Math.max(pad+1, r.height - pad);
-    const pts = [ {x:x1,y:y0}, {x:x0,y:y0}, {x:x0,y:y1}, {x:x1,y:y1}, {x:x1,y:y0} ];
-    const segs = []; let total = 0;
-    for (let i=0;i<pts.length-1;i++){
-      const a=pts[i], b=pts[i+1]; const len = Math.hypot(b.x-a.x, b.y-a.y);
-      segs.push({a,b,len}); total+=len;
-    }
-    return {segs,total};
-  }
-
-  function animateDragon(){
-    if (prefersReducedMotion  !dragonSprite  !stage) return;
-    dragonRunning = true;
-    let t0 = performance.now();
-    let path = getRectPathCCW();
-    let dist = 0;
-    const speed = DRAGON_SPEED_PX_S;
-
-    function step(t){
-      if (!dragonRunning) return;
-const dt = (t - t0) / 1000; t0 = t;
-      if (!isFinite(dt)) return (dragonRAF = requestAnimationFrame(step));
-      dist += speed * dt; let d = path.total ? (dist % path.total) : 0;
-
-      // find segment
-      let acc = 0, seg = path.segs[0];
-      for (const s of path.segs){
-        if (d <= acc + s.len){ seg = s; d -= acc; break; }
-        acc += s.len;
-      }
-      const f = seg.len ? Math.max(0, Math.min(1, d / seg.len)) : 0;
-      const x = seg.a.x + (seg.b.x - seg.a.x)*f;
-      const y = seg.a.y + (seg.b.y - seg.a.y)*f;
-      const angle = Math.atan2(seg.b.y - seg.a.y, seg.b.x - seg.a.x);
-
-      dragonSprite.style.left = x + 'px';
-      dragonSprite.style.top  = y + 'px';
-      dragonSprite.style.transform = translate(-50%,-50%) rotate(${angle}rad);
-
-      if (t - lastFire > FIRE_SPAWN_EVERY_MS){
-        lastFire = t;
-        const flame = document.createElement('div');
-        flame.className = 'fire';
-        flame.textContent = '🔥';
-        flame.style.left = x + 'px';
-        flame.style.top  = y + 'px';
-        fireLayer && fireLayer.appendChild(flame);
-        setTimeout(()=> flame.remove(), 1000);
-      }
-
-      dragonRAF = requestAnimationFrame(step);
-    }
-    dragonRAF = requestAnimationFrame(step);
-
-    // Recompute path on resize
-    window.addEventListener('resize', () => { path = getRectPathCCW(); }, {passive:true});
-  }
-
-  function stopDragon(){
-    dragonRunning = false;
-    cancelAnimationFrame(dragonRAF);
-    if (fireLayer) fireLayer.innerHTML = '';
-  }
-
-  /* ======== Main sequence ======== */
-  let running = false;
-  async function playSequence(){
-    if (running) return;
-    running = true;
-    if (finalEl){ finalEl.classList.remove('show'); finalEl.setAttribute('aria-hidden','true'); }
-
-    for (let i = 0; i < zodiacs.length; i++){
-      setStage(zodiacs[i], i);
-      await new Promise(r => setTimeout(r, ITEM_DURATION_MS));
-      if (i < zodiacs.length - 1) await new Promise(r => setTimeout(r, PAUSE_BETWEEN_MS));
-    }
-
-    // Ensure we end explicitly on Horse
-    const horseIndex = zodiacs.findIndex(z => z.name === 'Horse');
-    if (horseIndex >= 0) setStage(zodiacs[horseIndex], horseIndex);
-
-    requestAnimationFrame(()=>{
-      if (finalEl){
-        finalEl.classList.add('show');
-        finalEl.setAttribute('aria-hidden','false');
-      }
-      runConfetti(SHOW_FINAL_FIREWORKS_MS);
-    });
-
-    running = false;
-  }
-
-  /* ======== Start/Controls (multiple fallbacks) ======== */
-  function startAll(){
-    if (introOverlay) introOverlay.style.display = 'none';
-    safeStartAudio();
-    animateDragon();
-    playSequence();
-  }
-
-  // Expose fallback start for inline onclick
-  window.__start = startAll;
-
-  if (playBtn) playBtn.addEventListener('click', startAll);
-  if (introOverlay) introOverlay.addEventListener('keydown', (e)=>{ if (e.key==='Enter' || e.key===' ') startAll(); });
-
-  if (soundToggle){
-    soundToggle.addEventListener('click', () => {
-      const on = soundToggle.getAttribute('aria-pressed') !== 'true';
-      soundToggle.setAttribute('aria-pressed', String(on));
-      soundToggle.textContent = on ? '🔊 Sound: On' : '🔇 Sound: Off';
-      if (on){ audioOn = true; safeStartAudio(); } else { audioOn = false; safeStopAudio(); }
-    });
-  }
-  if (replayBtn) replayBtn.addEventListener('click', playSequence);
-
-  // Canvas sizing
-  window.addEventListener('load', sizeCanvas);
+/* ======== Progress dots ======== */
+const dots = [];
+zodiacs.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot';
+  d.setAttribute('aria-label', `Step ${i+1}: ${zodiacs[i].name}`);
+  progressEl.appendChild(d);
+  dots.push(d);
 });
+
+function setStage(item, index){
+  emojiEl.textContent = item.emoji;
+  labelEl.textContent = item.name;
+  emojiEl.setAttribute('aria-label', item.name);
+  emojiEl.classList.remove('enter'); labelEl.classList.remove('enter');
+  void emojiEl.offsetWidth; // restart animation
+  emojiEl.classList.add('enter'); labelEl.classList.add('enter');
+  dots.forEach((d,i)=> d.classList.toggle('active', i === index));
+}
+
+/* ======== Canvas sizing ======== */
+function sizeCanvas(){
+  if(!ctx) return;
+  const r = confettiCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  confettiCanvas.width = Math.max(1, Math.round(r.width * dpr));
+  confettiCanvas.height = Math.max(1, Math.round(r.height * dpr));
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+window.addEventListener('resize', sizeCanvas, {passive:true});
+
+/* ======== Confetti ======== */
+function runConfetti(ms){
+  if (!ctx || prefersReducedMotion) return;
+  sizeCanvas();
+  const dpr = window.devicePixelRatio || 1;
+  const W = (confettiCanvas.width || 0) / dpr;
+  const H = (confettiCanvas.height || 0) / dpr;
+
+  const colors = ['#fff7cc','#ffe08a','#ffd166','#ff9f1c','#ff6b6b','#ffd27a','#ffec9f'];
+  const pieces = Array.from({length: 160}, ()=> ({
+    x: Math.random()*W, y: -20 - Math.random()*H*0.4,
+    w: 6 + Math.random()*6, h: 10 + Math.random()*12,
+    vy: 1 + Math.random()*2.4, vx: -1 + Math.random()*2,
+    rot: Math.random()*Math.PI*2, vr: -0.2 + Math.random()*0.4,
+    color: colors[Math.floor(Math.random()*colors.length)], swing: Math.random()*1.2, life: 0
+  }));
+
+  let start = performance.now();
+  function tick(t){
+    const elapsed = t - start;
+    ctx.clearRect(0,0,W,H);
+    for(const p of pieces){
+      p.life += 1; p.vx += Math.sin((p.life + p.swing)*0.05)*0.02;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if(p.y > H + 18){ p.y = -18; p.x = Math.random()*W; } // wrap
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color; ctx.globalAlpha = 0.9;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    }
+    if (elapsed < ms){ requestAnimationFrame(tick); } else { ctx.clearRect(0,0,W,H); }
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ======== Dragon path (anti-clockwise) ======== */
+let dragonRunning = false, dragonRAF = 0, lastFire = 0;
+function getRectPathCCW(){
+  const pad = 12;
+  const r = stage.getBoundingClientRect();
+  const x0 = pad, y0 = pad;
+  const x1 = Math.max(pad+1, r.width - pad), y1 = Math.max(pad+1, r.height - pad);
+  const pts = [ {x:x1,y:y0}, {x:x0,y:y0}, {x:x0,y:y1}, {x:x1,y:y1}, {x:x1,y:y0} ]; // anti-clockwise
+  const segs = []; let total = 0;
+  for (let i=0;i<pts.length-1;i++){
+    const a=pts[i], b=pts[i+1]; const len = Math.hypot(b.x-a.x, b.y-a.y);
+    segs.push({a,b,len}); total+=len;
+  }
+  return {segs,total};
+}
+
+function animateDragon(){
+if (prefersReducedMotion) return;
+  dragonRunning = true;
+  let t0 = performance.now();
+  let path = getRectPathCCW();
+  let dist = 0;
+  const speed = DRAGON_SPEED_PX_S;
+
+  function step(t){
+    if (!dragonRunning) return;
+    const dt = (t - t0) / 1000; t0 = t;
+    dist += speed * dt; let d = path.total ? (dist % path.total) : 0;
+
+    // find segment
+    let acc = 0, seg = path.segs[0];
+    for (const s of path.segs){
+      if (d <= acc + s.len){ seg = s; d -= acc; break; }
+      acc += s.len;
+    }
+    const f = seg.len ? Math.max(0, Math.min(1, d / seg.len)) : 0;
+    const x = seg.a.x + (seg.b.x - seg.a.x)*f;
+    const y = seg.a.y + (seg.b.y - seg.a.y)*f;
+    const angle = Math.atan2(seg.b.y - seg.a.y, seg.b.x - seg.a.x);
+
+    dragonSprite.style.left = x + 'px';
+    dragonSprite.style.top  = y + 'px';
+    dragonSprite.style.transform = translate(-50%,-50%) rotate(${angle}rad);
+
+    if (t - lastFire > FIRE_SPAWN_EVERY_MS){
+      lastFire = t;
+      const flame = document.createElement('div');
+      flame.className = 'fire';
+      flame.textContent = '🔥';
+      flame.style.left = x + 'px';
+      flame.style.top  = y + 'px';
+      fireLayer.appendChild(flame);
+      setTimeout(()=> flame.remove(), 1000);
+    }
+
+    dragonRAF = requestAnimationFrame(step);
+  }
+  dragonRAF = requestAnimationFrame(step);
+
+  // Recompute path on resize
+  window.addEventListener('resize', () => { path = getRectPathCCW(); }, {passive:true});
+}
+
+/* ======== Audio (off until you tap) ======== */
+let audioCtx = null, masterGain = null, toneTimer = 0, audioOn = false;
+function startAudio(){
+  if (!audioOn) return;
+  try{
+    audioCtx = audioCtx  new (window.AudioContext  window.webkitAudioContext)();
+    if (!masterGain){
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = 0.06;
+      masterGain.connect(audioCtx.destination);
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const scale = [0,2,4,7,9]; const baseFreq = 392; let step = 0;
+    clearInterval(toneTimer);
+    toneTimer = setInterval(()=>{
+      if (!audioCtx || audioCtx.state === 'suspended') return;
+      const idx = scale[step % scale.length];
+      const freq = baseFreq * Math.pow(2, idx/12);
+      const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+      o.type='sine'; o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(1, audioCtx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.28);
+      o.connect(g).connect(masterGain); o.start(); o.stop(audioCtx.currentTime + 0.3);
+      if (step % 8 === 0){
+        const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain();
+        o2.type='sine'; o2.frequency.value=freq/2;
+        g2.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        g2.gain.exponentialRampToValueAtTime(1, audioCtx.currentTime + 0.02);
+        g2.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.4);
+        o2.connect(g2).connect(masterGain); o2.start(); o2.stop(audioCtx.currentTime + 0.42);
+      }
+      step++;
+    }, 360);
+  }catch(e){ console.warn('Audio failed:', e); }
+}
+function stopAudio(){
+  clearInterval(toneTimer);
+  if (audioCtx && audioCtx.state !== 'closed') audioCtx.suspend();
+}
+
+soundToggle.addEventListener('click', () => {
+  audioOn = !audioOn;
+  soundToggle.setAttribute('aria-pressed', String(audioOn));
+  soundToggle.textContent = audioOn ? '🔊 Sound' : '🔈 Sound';
+  if (audioOn) startAudio(); else stopAudio();
+});
+
+/* ======== Main sequence ======== */
+let running = false;
+async function playSequence(){
+  if (running) return;
+  running = true;
+  finalEl.classList.remove('show');
+  finalEl.setAttribute('aria-hidden','true');
+
+  for (let i = 0; i < zodiacs.length; i++){
+    setStage(zodiacs[i], i);
+    await new Promise(r => setTimeout(r, ITEM_DURATION_MS));
+    if (i < zodiacs.length - 1) await new Promise(r => setTimeout(r, PAUSE_BETWEEN_MS));
+  }
+
+  // Ensure we end explicitly on Horse
+  const horseIndex = zodiacs.findIndex(z => z.
+name === 'Horse');
+  setStage(zodiacs[horseIndex], horseIndex);
+
+  requestAnimationFrame(()=>{
+    finalEl.classList.add('show');
+    finalEl.setAttribute('aria-hidden','false');
+    runConfetti(SHOW_FINAL_FIREWORKS_MS);
+  });
+
+  running = false;
+}
+
+/* ======== Kick off automatically ======== */
+window.addEventListener('load', () => {
+  sizeCanvas();
+  animateDragon();
+  playSequence();   // auto-start (no play button needed)
+});
+replayBtn.addEventListener('click', playSequence);
 </script>
 </body>
 </html>
